@@ -9,7 +9,7 @@ import cors from "cors";
 
 const app = express();
 
-const HOST = "127.0.0.1";
+const HOST = "0.0.0.0";
 const PORT = 3000;
 
 app.use(express.json());
