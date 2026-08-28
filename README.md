@@ -1,4 +1,4 @@
-# Projeto — Frontend + Backend
+# Projeto — CRUD + MongoDB + Docker
 
 Projeto composto por um **frontend estático** servido pelo Nginx e um **backend Node.js + Express**, com conexão ao MongoDB.
 
