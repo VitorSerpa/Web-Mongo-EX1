@@ -1,1 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AutoManager - Veículos</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container header-content">
+            <div>
+                <h1>AutoManager</h1>
+                <p>Gerenciamento de veículos</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="card">
+            <div class="card-header">
+                <div>
+                    <h2>Cadastrar veículo</h2>
+                    <p>Adicione um novo veículo ao sistema</p>
+                </div>
+            </div>
+
+            <form id="carro-form">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="nome">Nome</label>
+                        <input type="text" id="nome" name="nome" placeholder="Ex: Civic" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="marca">Marca</label>
+                        <input type="text" id="marca" name="marca" placeholder="Ex: Honda" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motorizacao">Motorização</label>
+                        <input type="text" id="motorizacao" name="motorizacao" placeholder="Ex: 2.0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ano">Ano</label>
+                        <input type="number" id="ano" name="ano" placeholder="Ex: 2024" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="km">Quilometragem</label>
+                        <input type="number" id="km" name="km" placeholder="Ex: 35000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cambio">Câmbio</label>
+                        <select id="cambio" name="cambio" required>
+                            <option value="">Selecione</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Automático">Automático</option>
+                            <option value="CVT">CVT</option>
+                            <option value="Automatizado">Automatizado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cor">Cor</label>
+                        <input type="text" id="cor" name="cor" placeholder="Ex: Preto" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="combustivel">Combustível</label>
+                        <select id="combustivel" name="combustivel" required>
+                            <option value="">Selecione</option>
+                            <option value="Gasolina">Gasolina</option>
+                            <option value="Etanol">Etanol</option>
+                            <option value="Flex">Flex</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Híbrido">Híbrido</option>
+                            <option value="Elétrico">Elétrico</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-secondary">
+                        Limpar
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        Cadastrar veículo
+                    </button>
+                </div>
+
+            </form>
+        </section>
+        <!-- Lista -->
+        <section class="card">
+
+            <div class="card-header list-header">
+                <div>
+                    <h2>Veículos cadastrados</h2>
+                    <p>Gerencie os veículos registrados no sistema</p>
+                </div>
+
+                <span class="vehicle-count">
+                    0 veículos
+                </span>
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Marca</th>
+                            <th>Motor</th>
+                            <th>Ano</th>
+                            <th>KM</th>
+                            <th>Câmbio</th>
+                            <th>Cor</th>
+                            <th>Combustível</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="carros-lista">
+
+                        <tr>
+                            <td colspan="9" class="empty">
+                                Nenhum veículo cadastrado.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+        <script>
+            const API_URL = "http://127.0.0.1:3000/carros";
+
+            const form = document.getElementById("carro-form");
+            const lista = document.getElementById("carros-lista");
+            const contador = document.querySelector(".vehicle-count");
+
+            let carroEditandoId = null;
+
+
+            async function carregarCarros() {
+                try {
+                    const response = await fetch(API_URL);
+
+                    if (!response.ok) {
+                        throw new Error("Erro ao buscar carros");
+                    }
+
+                    const carros = await response.json();
+
+                    lista.innerHTML = "";
+
+                    contador.textContent =
+                        `${carros.length} veículo${carros.length !== 1 ? "s" : ""}`;
+
+                    if (carros.length === 0) {
+                        lista.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty">
+                            Nenhum veículo cadastrado.
+                        </td>
+                    </tr>
+                `;
+
+                        return;
+                    }
+
+                    carros.forEach(carro => {
+
+                        const tr = document.createElement("tr");
+
+                        tr.innerHTML = `
+                    <td>${carro.nome}</td>
+                    <td>${carro.marca}</td>
+                    <td>${carro.motorizacao}</td>
+                    <td>${carro.ano}</td>
+                    <td>${Number(carro.km).toLocaleString("pt-BR")} km</td>
+                    <td>${carro.cambio}</td>
+                    <td>${carro.cor}</td>
+                    <td>${carro.combustivel}</td>
+
+                    <td>
+                        <div class="actions">
+
+                            <button
+                                class="btn-edit"
+                                onclick="editarCarro('${carro._id}')"
+                            >
+                                Editar
+                            </button>
+
+                            <button
+                                class="btn-delete"
+                                onclick="excluirCarro('${carro._id}')"
+                            >
+                                Excluir
+                            </button>
+
+                        </div>
+                    </td>
+                `;
+
+                        lista.appendChild(tr);
+                    });
+
+                } catch (error) {
+
+                    console.error("Erro:", error);
+
+                    lista.innerHTML = `
+                <tr>
+                    <td colspan="9" class="empty">
+                        Erro ao carregar os veículos.
+                    </td>
+                </tr>
+            `;
+                }
+            }
+
+
+            form.addEventListener("submit", async (event) => {
+
+                event.preventDefault();
+
+                const carro = {
+                    nome: document.getElementById("nome").value,
+                    marca: document.getElementById("marca").value,
+                    motorizacao: document.getElementById("motorizacao").value,
+                    ano: Number(document.getElementById("ano").value),
+                    km: Number(document.getElementById("km").value),
+                    cambio: document.getElementById("cambio").value,
+                    cor: document.getElementById("cor").value,
+                    combustivel: document.getElementById("combustivel").value
+                };
+
+
+                try {
+
+                    let response;
+
+
+
+                    if (carroEditandoId) {
+
+                        response = await fetch(
+                            `${API_URL}/${carroEditandoId}`,
+                            {
+                                method: "PUT",
+
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+
+                                body: JSON.stringify(carro)
+                            }
+                        );
+
+                    }
+
+
+                    else {
+
+                        response = await fetch(API_URL, {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify(carro)
+                        });
+
+                    }
+
+
+                    if (!response.ok) {
+                        throw new Error("Erro ao salvar veículo");
+                    }
+
+
+                    const resultado = await response.json();
+
+                    console.log("Resultado:", resultado);
+
+
+                    if (carroEditandoId) {
+                        alert("Veículo atualizado com sucesso!");
+                    } else {
+                        alert("Veículo cadastrado com sucesso!");
+                    }
+
+
+
+                    carroEditandoId = null;
+
+                    form.reset();
+
+                    document.querySelector(".btn-primary").textContent =
+                        "Cadastrar veículo";
+
+
+                    // Atualiza tabela
+
+                    await carregarCarros();
+
+
+                } catch (error) {
+
+                    console.error("Erro:", error);
+
+                    alert("Erro ao salvar veículo.");
+                }
+            });
+
+
+
+            async function editarCarro(id) {
+
+                try {
+
+                    const response = await fetch(`${API_URL}/${id}`);
+
+                    if (!response.ok) {
+                        throw new Error("Erro ao buscar veículo");
+                    }
+
+                    const carro = await response.json();
+
+
+                    // Preenche formulário
+
+                    document.getElementById("nome").value =
+                        carro.nome;
+
+                    document.getElementById("marca").value =
+                        carro.marca;
+
+                    document.getElementById("motorizacao").value =
+                        carro.motorizacao;
+
+                    document.getElementById("ano").value =
+                        carro.ano;
+
+                    document.getElementById("km").value =
+                        carro.km;
+
+                    document.getElementById("cambio").value =
+                        carro.cambio;
+
+                    document.getElementById("cor").value =
+                        carro.cor;
+
+                    document.getElementById("combustivel").value =
+                        carro.combustivel;
+
+
+
+                    carroEditandoId = id;
+
+
+
+                    document.querySelector(".btn-primary").textContent =
+                        "Atualizar veículo";
+
+
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
+
+
+                } catch (error) {
+
+                    console.error("Erro:", error);
+
+                    alert("Erro ao carregar veículo.");
+                }
+            }
+
+
+
+
+            async function excluirCarro(id) {
+
+                const confirmar = confirm(
+                    "Tem certeza que deseja excluir este veículo?"
+                );
+
+                if (!confirmar) {
+                    return;
+                }
+
+
+                try {
+
+                    const response = await fetch(
+                        `${API_URL}/${id}`,
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+
+                    if (!response.ok) {
+                        throw new Error("Erro ao excluir veículo");
+                    }
+
+
+                    alert("Veículo excluído com sucesso!");
+
+
+                    // Atualiza lista
+
+                    await carregarCarros();
+
+
+                } catch (error) {
+
+                    console.error("Erro:", error);
+
+                    alert("Erro ao excluir veículo.");
+                }
+            }
+
+
+
+
+            form.addEventListener("reset", () => {
+
+                carroEditandoId = null;
+
+                document.querySelector(".btn-primary").textContent =
+                    "Cadastrar veículo";
+            });
+
+
+            carregarCarros();
+
+        </script>
+
+    </main>
+
+</body>
+
+</html>
